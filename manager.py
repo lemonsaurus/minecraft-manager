@@ -3,13 +3,14 @@
 # BE HELPIN' YER LOAD UP YER CRAFTSYMINE O'ER THERE
 
 import re
+import textwrap
 import time
 import math
 import os
 
 import typer
 from rich import print
-from rich.progress import track, Progress, SpinnerColumn, TextColumn
+from rich.progress import Progress, SpinnerColumn, TextColumn
 
 from utils.docker import Docker
 
@@ -201,16 +202,17 @@ def status():
         ingame_minutes = int((int(current_time) % 1000) / 1000.0 * 60)
         ingame_time = f"{ingame_hours:02}:{ingame_minutes:02}"
 
-        status = f"""\
-[bold magenta]{_get_human_modpack()}[/bold magenta]
+        status = textwrap.dedent(f"""\
+            [bold magenta]{_get_human_modpack()}[/bold magenta]
 
-Current status:      {"[green bold]Running[/green bold]" if server_running else "[red bold]Paused[/red bold]"}
-Ingame days passed:  [bold blue]{current_day} days[/bold blue]
-Current ingame time: [bold yellow]{ingame_time}[/bold yellow]
+            Current status:      {"[green bold]Running[/green bold]" if server_running else "[red bold]Paused[/red bold]"}
+            Ingame days passed:  [bold blue]{current_day} days[/bold blue]
+            Current ingame time: [bold yellow]{ingame_time}[/bold yellow]
 
-{players_online}{":" if player_list else ""}
-{player_list if player_list else ""}
-"""
+            {players_online}{":" if player_list else ""}
+            {player_list if player_list else ""}
+            """
+        )
         print(status)
     else:
         raise ContainerNotFound("Could not find an active game container!")

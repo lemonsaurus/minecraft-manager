@@ -4,7 +4,7 @@ My kid has an insatiable appetite for minecraft, and wants to play with his frie
 
 This manager makes it trivial to set up and manage multiple modpacks on the same server. It also comes with some convenient quality of life features.
 
-The simplest way to use this is to have clients set up modpacks with Curseforge, download the corresponding server pack, and set it all up with docker. I've provided two example docker composefiles for how this can be done with different popular modpacks.
+The simplest way to use this is to have clients set up modpacks with Curseforge, download the corresponding server pack, and set it all up with docker. I've provided two example docker compose files for how this can be done with different popular modpacks.
 
 Feel free to fork this repo and set up your own modpacks, or to just borrow code or ideas from it.
 
@@ -17,7 +17,7 @@ ln -s /opt/minecraft/manager.py /usr/bin/minecraft
 
 ## Commands
 
-### minecraft --help          
+### minecraft --help
 Shows available commands.
 
 ![image](https://user-images.githubusercontent.com/2098517/192712797-9eb5d59b-84f5-4d90-bbad-97d8e227f38d.png)
@@ -27,24 +27,24 @@ Backup and close down the old modpack, load a new one!
 
 ![minecraft_load](https://user-images.githubusercontent.com/2098517/192714327-680ffb9b-0909-4013-9fd9-90afa6c2fb42.gif)
 
-### minecraft list            
+### minecraft list
 List all currently available mods.
 
 ![image](https://user-images.githubusercontent.com/2098517/192713046-63a874b3-056a-4d9d-a8c0-01aad4016b14.png)
 
-### minecraft logs            
-Show logs for current running container. 
-- Use `--tail` to specify how many lines to show 
+### minecraft logs
+Show logs for current running container.
+- Use `--tail` to specify how many lines to show
 - Use `--follow` if you want a log stream.
 
 ![image](https://user-images.githubusercontent.com/2098517/192713703-e8678f5f-c70f-4b93-bd87-a9a1c63625b2.png)
 
-### minecraft status          
+### minecraft status
 Shows current modpack, server time, active players and other useful information.
 
 ![image](https://user-images.githubusercontent.com/2098517/192713239-8b932954-b101-4c10-aa3f-9dcdcff2cfc4.png)
 
-### minecraft backup          
+### minecraft backup
 Do an instant backup of the current running server, if possible.
 This relies on the server not currently being paused by the auto-pause functionality in minecraft-docker, and on the backup instance actually running.
 
