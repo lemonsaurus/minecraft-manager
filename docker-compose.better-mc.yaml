@@ -12,7 +12,7 @@ services:
       TYPE: CURSEFORGE
       CF_SERVER_MOD: /modpacks/better-mc-pack-fabric-1-19-2-FIXED.zip
       VERSION: 1.19.2
-      MOTD: "§l§9Viktor§r Goes To §l§cR§6a§ei§an§9b§do§5w §dL§9a§an§ed"
+      MOTD: "§l§9Better Minecraft§r: §l§cR§6a§ei§an§9b§do§5w §dL§9a§an§ed"
       WHITELIST_FILE: /extras/whitelist.json
       OPS_FILE: /extras/ops.json
       OVERRIDE_SERVER_PROPERTIES: true
@@ -39,6 +39,6 @@ services:
         echo "Cleaned! Only three newest backups remain."
     volumes:
     - ./better-mc/data:/data:ro
-    - /home/dropbox/Dropbox/backup/enderman.hideous.monster/better-mc:/backups
+    - /home/backup/better-mc:/backups
     restart: unless-stopped
     network_mode: "service:better-minecraft"
