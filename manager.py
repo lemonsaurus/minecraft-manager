@@ -11,7 +11,7 @@ import typer
 from rich import print
 from rich.progress import track, Progress, SpinnerColumn, TextColumn
 
-from etc.docker import Docker
+from utils.docker import Docker
 
 
 MODPACK_EXPRESSION = r"minecraft-(?!.*backup)([\w-]+)-1"
