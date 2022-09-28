@@ -1,4 +1,5 @@
-# minecraft-manager
+![image (14)](https://user-images.githubusercontent.com/2098517/192717807-5c3dc59a-eb81-47f6-95e2-2ddbb67a5e4f.png)
+
 My kid has an insatiable appetite for minecraft, and wants to play with his friends and his family online. What's more, he wants to play many different modpacks, switching between them almost every day.
 
 This manager makes it trivial to set up and manage multiple modpacks on the same server. It also comes with some convenient quality of life features.
