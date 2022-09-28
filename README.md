@@ -5,6 +5,8 @@ This manager makes it trivial to set up and manage multiple modpacks on the same
 
 The simplest way to use this is to have clients set up modpacks with Curseforge, download the corresponding server pack, and set it all up with docker. I've provided two example docker composefiles for how this can be done with different popular modpacks.
 
+Feel free to fork this repo and set up your own modpacks, or to just borrow code or ideas from it.
+
 ## How to use
 Store in some folder on your server, and set up a symbolic link for your convenience. Something like this:
 ```
