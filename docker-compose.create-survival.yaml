@@ -3,8 +3,11 @@ version: '3.8'
 services:
   create-above-and-beyond-survival:
     image: itzg/minecraft-server:java8-multiarch
+    
+    # May improve performance
     security_opt:
-      - seccomp:unconfined
+      - seccomp:unconfined 
+    
     volumes:
     - ./create-above-and-beyond-survival/data:/data
     - ./create-above-and-beyond-survival/config:/config
@@ -12,13 +15,14 @@ services:
     - ./create-above-and-beyond-survival/modpacks:/modpacks:ro
     - ./create-above-and-beyond-survival/worlds:/worlds
     - ./common:/common:ro
+    
     environment:
       EULA: "true"
       TYPE: FORGE
       GENERIC_PACK: /modpacks/Above+and+Beyond-1.3-Server.zip
       VERSION: 1.16.5
       FORGEVERSION: 36.2.20
-      MOTD: "Create a §l§5hideous monster§r in §cyour heart"
+      MOTD: "§l§5Create: Above and Beyond§r (§cSurvival)"
       ICON: /extras/server-icon.png
       WORLD: /worlds/world
       WHITELIST_FILE: /common/whitelist.json
@@ -47,6 +51,6 @@ services:
         echo "Cleaned! Only three newest backups remain."
     volumes:
     - ./create-above-and-beyond-survival/data:/data:ro
-    - /home/dropbox/Dropbox/backup/enderman.hideous.monster/create-above-and-beyond:/backups
+    - /home/backup/create-above-and-beyond:/backups
     restart: unless-stopped
     network_mode: "service:create-above-and-beyond-survival"
