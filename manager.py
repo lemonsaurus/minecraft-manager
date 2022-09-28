@@ -9,7 +9,7 @@ import os
 
 import typer
 from rich import print
-from rich.progress import track, Progress, SpinnerColumn, TextColumn
+from rich.progress import Progress, SpinnerColumn, TextColumn
 
 from utils.docker import Docker
 
