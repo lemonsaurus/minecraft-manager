@@ -13,7 +13,7 @@ services:
       GENERIC_PACK: /modpacks/Above+and+Beyond-1.3-Server.zip
       VERSION: 1.16.5
       FORGEVERSION: 36.2.20
-      MOTD: "§l§5Creative Mode§r + §cCreate - Above and Beyond"
+      MOTD: "§cCreate - Above and Beyond§r - §l§5Creative Mode"
       WHITELIST_FILE: /common/whitelist.json
       OPS_FILE: /common/ops.json
       OVERRIDE_SERVER_PROPERTIES: true
@@ -40,6 +40,6 @@ services:
         echo "Cleaned! Only three newest backups remain."
     volumes:
     - ./create-above-and-beyond-creative/data:/data:ro
-    - /home/dropbox/Dropbox/backup/enderman.hideous.monster/create-above-and-beyond:/backups
+    - /home/backup/create-above-and-beyond:/backups
     restart: unless-stopped
     network_mode: "service:create-above-and-beyond-creative"
