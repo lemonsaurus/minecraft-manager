@@ -1,5 +1,9 @@
 # minecraft-manager
-A tool I use to host and manage my own personal minecraft server.
+My kid has an insatiable appetite for minecraft, and wants to play with his friends and his family online. What's more, he wants to play many different modpacks, switching between them almost every day.
+
+This manager makes it trivial to set up and manage multiple modpacks on the same server. It also comes with some convenient quality of life features.
+
+The simplest way to use this is to have clients set up modpacks with Curseforge, download the corresponding server pack, and set it all up with docker. I've provided two example docker composefiles for how this can be done with different popular modpacks.
 
 ## How to use
 Store in some folder on your server, and set up a symbolic link for your convenience. Something like this:
