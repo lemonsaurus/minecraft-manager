@@ -1,19 +1,22 @@
 version: '3.8'
 
 services:
-  create-above-and-beyond-creative:
+  create-survival:
     image: itzg/minecraft-server:java8-multiarch
+    container_name: create-survival-server
+    security_opt:
+      - seccomp:unconfined
     volumes:
-    - ./create-above-and-beyond-creative/data:/data
-    - ./create-above-and-beyond-survival/modpacks:/modpacks:ro
-    - ./common:/common:ro
+      - ./data:/data
+      - ../../common:/common:ro
+      - ./server.zip:/modpacks/server.zip
     environment:
       EULA: "true"
       TYPE: FORGE
-      GENERIC_PACK: /modpacks/Above+and+Beyond-1.3-Server.zip
+      GENERIC_PACK: /modpacks/server.zip
       VERSION: 1.16.5
       FORGEVERSION: 36.2.20
-      MOTD: "§cCreate - Above and Beyond§r - §l§5Creative Mode"
+      MOTD: "§l§cCreate: Above and Beyond§r (§5Survival§r)"
       WHITELIST_FILE: /common/whitelist.json
       OPS_FILE: /common/ops.json
       OVERRIDE_SERVER_PROPERTIES: true
@@ -25,21 +28,22 @@ services:
     restart: unless-stopped
     ports:
       - "25565:25565"
-  
-  backup-create-above-and-beyond-creative:
+
+  create-survival-backup:
     image: itzg/mc-backup
+    container_name: create-survival-backup
     environment:
       BACKUP_INTERVAL: "1h"
-      MODPACK: "Create - Above and Beyond - Creative Mode"
-      BACKUP_NAME: "create-above-and-beyond-creative"
+      MODPACK: "Create: Above and Beyond (v1.16.5) - Survival Mode"
+      BACKUP_NAME: "create-survival"
       PAUSE_IF_NO_PLAYERS: true
       POST_BACKUP_SCRIPT: |
         echo "Completed backup for $$MODPACK!"
         echo "Cleaning up superfluous backups..."
-        ls -t /backups | tail -n +4 | xargs rm --        
+        ls -t /backups | tail -n +4 | xargs rm --
         echo "Cleaned! Only three newest backups remain."
     volumes:
-    - ./create-above-and-beyond-creative/data:/data:ro
-    - /home/backup/create-above-and-beyond:/backups
+    - ./data:/data:ro
+    - /home/backups/create-above-and-beyond:/backups  # Set a path connected to cloud storage here for easy off-site backup!
     restart: unless-stopped
-    network_mode: "service:create-above-and-beyond-creative"
+    network_mode: "service:create-survival"

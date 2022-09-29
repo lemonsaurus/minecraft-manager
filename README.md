@@ -15,6 +15,13 @@ chmod +x /opt/minecraft/manager.py
 ln -s /opt/minecraft/manager.py /usr/bin/minecraft
 ```
 
+The `modpacks` folder will all your server modpacks, and each mod subfolder must contain these three things:
+- An empty `data` folder, which will be hooked up as a volume in the docker-compose file.
+- A `docker-compose.yaml` with the configuration needed to set up the server, as well as automated backups. See examples in this repo.
+- A `server.zip` that contains the server modpack. You can usually get this from whichever mod manager or launcher you're using on the client.
+
+Please note that all the `server.zip`s in this repo are just empty placeholder files.
+
 ## Commands
 
 ### minecraft --help
