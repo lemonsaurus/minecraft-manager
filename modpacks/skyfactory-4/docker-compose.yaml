@@ -1,20 +1,23 @@
 version: '3.8'
 
 services:
-  better-minecraft:
+  skyfactory-4:
     image: itzg/minecraft-server
+    container_name: skyfactory-4-server
+    security_opt:
+      - seccomp:unconfined
     volumes:
-    - ./better-mc/data:/data
-    - ./better-mc/modpacks:/modpacks:ro
-    - ./common:/extras
+      - ./data:/data
+      - ./server.zip:/modpacks/server.zip
+      - ../../common:/common
     environment:
       EULA: "true"
       TYPE: CURSEFORGE
-      CF_SERVER_MOD: /modpacks/better-mc-pack-fabric-1-19-2-FIXED.zip
-      VERSION: 1.19.2
-      MOTD: "§l§9Better Minecraft§r: §l§cR§6a§ei§an§9b§do§5w §dL§9a§an§ed"
-      WHITELIST_FILE: /extras/whitelist.json
-      OPS_FILE: /extras/ops.json
+      CF_SERVER_MOD: /modpacks/server.zip
+      VERSION: 1.12.2
+      MOTD: "§l§cSkyFactory 4§r (§5v1.12.2§r)"
+      WHITELIST_FILE: /common/whitelist.json
+      OPS_FILE: /common/ops.json
       OVERRIDE_SERVER_PROPERTIES: true
       OVERRIDE_WHITELIST: true
       MAX_TICK_TIME: -1
@@ -24,13 +27,14 @@ services:
     restart: unless-stopped
     ports:
       - "25565:25565"
-  
-  backup-better-minecraft:
+
+  skyfactory-4-backup:
     image: itzg/mc-backup
+    container_name: skyfactory-4-backup
     environment:
       BACKUP_INTERVAL: "1h"
-      MODPACK: "Better Minecraft"
-      BACKUP_NAME: "better-minecraft"
+      MODPACK: "SkyFactory 4 (v1.12.2)"
+      BACKUP_NAME: "skyfactory-4"
       PAUSE_IF_NO_PLAYERS: true
       POST_BACKUP_SCRIPT: |
         echo "Completed backup for $$MODPACK!"
@@ -38,7 +42,7 @@ services:
         ls -t /backups | tail -n +4 | xargs rm --
         echo "Cleaned! Only three newest backups remain."
     volumes:
-    - ./better-mc/data:/data:ro
-    - /home/backup/better-mc:/backups
+    - ./data:/data:ro
+    - /home/backups/skyfactory-4:/backups  # Set a path connected to cloud storage here for easy off-site backup!
     restart: unless-stopped
-    network_mode: "service:better-minecraft"
+    network_mode: "service:skyfactory-4"

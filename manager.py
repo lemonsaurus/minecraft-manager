@@ -1,36 +1,37 @@
 #!/usr/bin/python3
-# ACH HELLO YONG MAN, I AM SCRUFFY MCLOADER AND I WILL
-# BE HELPIN' YER LOAD UP YER CRAFTSYMINE O'ER THERE
 
 import re
+import textwrap
 import time
 import math
 import os
+import pathlib
 
 import typer
 from rich import print
-from rich.progress import track, Progress, SpinnerColumn, TextColumn
+from rich.progress import Progress, SpinnerColumn, TextColumn
 
 from utils.docker import Docker
 
 
-MODPACK_EXPRESSION = r"minecraft-(?!.*backup)([\w-]+)-1"
-BACKUP_CONTAINER_EXPRESSION = r"minecraft-backup-[\w-]+-1"
-COMPOSE_FILES = {
-    "create-above-and-beyond-creative": "docker-compose.create-creative.yaml",
-    "create-above-and-beyond-survival": "docker-compose.create-survival.yaml",
-    "better-minecraft": "docker-compose.better-mc.yaml",
-}
-MODPACK_SHORTNAMES = {
-    "create-survival": "create-above-and-beyond-survival",
-    "create-creative": "create-above-and-beyond-creative",
-    "better-mc": "better-minecraft",
-}
-MODPACK_HUMAN_NAMES = {
-    "create-above-and-beyond-creative": "Create: Above and Beyond v1.16.5 (Creative Mode)",
-    "create-above-and-beyond-survival": "Create: Above and Beyond v1.16.5 (Survival Mode)",
-    "better-minecraft": "Better Minecraft v1.19.2 (Survival Mode)",
-}
+# Regex expressions for parsing docker container names!
+SERVER_CONTAINER_EXPRESSION = r"\s([\w-]+)?-server"
+BACKUP_CONTAINER_EXPRESSION = r"\s[\w-]+-backup"
+
+# Crawl the modpacks folder to discover modpack names
+MODPACK_SHORT_NAMES = [
+    entry.name for entry in pathlib.Path("/opt/minecraft/modpacks").iterdir() if entry.is_dir()
+]
+
+# Crawl the docker-compose files to find full modnames
+MODPACK_FULL_NAMES = {}
+for modpack in MODPACK_SHORT_NAMES:
+    with open(f"/opt/minecraft/modpacks/{modpack}/docker-compose.yaml") as compose_file:
+        for line in compose_file.readlines():
+            if "MODPACK: " in line:
+                full_name = line.strip().split('MODPACK: "')[1][:-1]
+                MODPACK_FULL_NAMES[modpack] = full_name
+
 
 # Helper class instances
 docker = Docker()
@@ -45,18 +46,14 @@ class ContainerNotFound(Exception):
     """An error raised when a container could not be found."""
 
 # Helper functions
-def _resolve_modpack(user_input: str):
+def _validate_modpack(user_input: str):
     """
     When a user provides a modpack name, this function checks whether it's valid.
 
-    If user enters longname, returns the longname.
-    If user enters shortname, resolves  and returns longname.
-    If user input isn't found, returns None.
+    If the modpack folder isn't found, returns None.
     """
-    if user_input in COMPOSE_FILES:
+    if user_input in MODPACK_SHORT_NAMES:
         return user_input
-    elif user_input in MODPACK_SHORTNAMES:
-        return MODPACK_SHORTNAMES.get(user_input)
     else:
         return None
 
@@ -65,12 +62,12 @@ def _get_human_modpack(modpack: str = None):
     """Get a nice, human-readable modpack name for display."""
     if not modpack:
         modpack = _get_active_modpack()
-    return MODPACK_HUMAN_NAMES.get(modpack)
+    return MODPACK_FULL_NAMES.get(modpack)
 
 
 def _get_active_modpack():
     """Checks the 'docker ps' output to see which modpack is currently active, if any."""
-    modpack = re.search(MODPACK_EXPRESSION, docker.ps())
+    modpack = re.search(SERVER_CONTAINER_EXPRESSION, docker.ps())
 
     if modpack:
         return modpack.group(1)
@@ -91,7 +88,7 @@ def _server_is_running():
 
 def _get_game_container_name():
     """Checks the 'docker ps' output to fetch the currently active game container name, if any."""
-    container_name = re.search(MODPACK_EXPRESSION, docker.ps())
+    container_name = re.search(SERVER_CONTAINER_EXPRESSION, docker.ps())
 
     if container_name:
         return container_name.group(0)
@@ -114,9 +111,9 @@ def _get_compose_file(modpack=None):
     If no modpack is provided, get for currently running modpack.
     """
     if modpack:
-        return COMPOSE_FILES.get(modpack)
+        return f"/opt/minecraft/modpacks/{modpack}/docker-compose.yaml"
     else:
-        return COMPOSE_FILES.get(_get_active_modpack())
+        return f"/opt/minecraft/modpacks/{_get_active_modpack()}/docker-compose.yaml"
 
 def _do_instant_backup():
     """
@@ -136,27 +133,27 @@ def _do_instant_backup():
 @cli.command()
 def load(new_modpack: str):
     """Back up and shut down the current modpack, and load a new one."""
-    if _resolve_modpack(new_modpack) == _get_active_modpack():
+    if new_modpack == _get_active_modpack():
         print(f"❌  [red]Aborted:[/red]Requested modpack is already running!")
         return
-    elif not _resolve_modpack(new_modpack):
+    elif not _validate_modpack(new_modpack):
         print(f"❌  [red]Aborted:[/red]Could not resolve modpack name {new_modpack}!")
         return
 
     human_current_modpack = _get_human_modpack()
-    human_new_modpack = _get_human_modpack(_resolve_modpack(new_modpack))
+    human_new_modpack = _get_human_modpack(new_modpack)
 
     with spinner as progress:
-        if _server_is_running():
+        if _get_active_modpack() and _server_is_running():
             progress.add_task(f"Backing up current modpack ([blue]{human_current_modpack}[/blue]")
             _do_instant_backup()
 
-        progress.add_task(f"Shutting down currently running modpack ([blue]{human_current_modpack}[/blue])")
-        docker.compose_down(_get_compose_file())
+        if _get_active_modpack():
+            progress.add_task(f"Shutting down currently running modpack ([blue]{human_current_modpack}[/blue])")
+            docker.compose_down(_get_compose_file())
 
         progress.add_task(f"Starting up the new modpack ([green]{human_new_modpack}[/green])")
-        modpack = _resolve_modpack(new_modpack)
-        new_compose_file = _get_compose_file(modpack)
+        new_compose_file = _get_compose_file(new_modpack)
         docker.compose_up(new_compose_file)
         time.sleep(20)
 
@@ -189,28 +186,29 @@ def status():
     container_name = _get_game_container_name()
 
     if container_name:
-        list = docker.exec(f"{container_name} rcon-cli list")
+        _list = docker.exec(f"{container_name} rcon-cli list")
         current_day = docker.exec(f"{container_name} rcon-cli time query day").split("\n")[0].split(" ")[-1]
         current_time = docker.exec(f"{container_name} rcon-cli time query daytime").split("\n")[0].split(" ")[-1]
         server_running = _server_is_running()
 
         # Sanitize output
-        players_online, player_list = list.split(": ")
+        players_online, player_list = _list.split(": ")
         player_list = player_list.split("\n")[0]
         ingame_hours = math.floor(int(current_time) / 1000 + 8) % 24
         ingame_minutes = int((int(current_time) % 1000) / 1000.0 * 60)
         ingame_time = f"{ingame_hours:02}:{ingame_minutes:02}"
 
-        status = f"""\
-[bold magenta]{_get_human_modpack()}[/bold magenta]
+        status = textwrap.dedent(f"""\
+            [bold magenta]{_get_human_modpack()}[/bold magenta]
 
-Current status:      {"[green bold]Running[/green bold]" if server_running else "[red bold]Paused[/red bold]"}
-Ingame days passed:  [bold blue]{current_day} days[/bold blue]
-Current ingame time: [bold yellow]{ingame_time}[/bold yellow]
+            Current status:      {"[green bold]Running[/green bold]" if server_running else "[red bold]Paused[/red bold]"}
+            Ingame days passed:  [bold blue]{current_day} days[/bold blue]
+            Current ingame time: [bold yellow]{ingame_time}[/bold yellow]
 
-{players_online}{":" if player_list else ""}
-{player_list if player_list else ""}
-"""
+            {players_online}{":" if player_list else ""}
+            {player_list if player_list else ""}
+            """
+        )
         print(status)
     else:
         raise ContainerNotFound("Could not find an active game container!")
@@ -243,11 +241,11 @@ def logs(service: str = "server", tail: str = "100", follow: bool = False):
     print(f"[cyan]{docker.logs(container_name, tail)}[/cyan]")
 
 
-@cli.command()
-def list():
+@cli.command(name="list")
+def _list():
     """List all the available modpacks to switch between."""
     print(f"[cyan bold]Available modpacks:[/cyan bold]")
-    for shortname, fullname in MODPACK_HUMAN_NAMES.items():
+    for shortname, fullname in MODPACK_FULL_NAMES.items():
         print(f"• [green bold]{fullname}[/green bold] ([yellow]{shortname}[/yellow])")
 
 

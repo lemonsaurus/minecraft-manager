@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  create-creative:
+    image: itzg/minecraft-server:java8-multiarch
+    container_name: create-creative-server
+    security_opt:
+      - seccomp:unconfined
+    volumes:
+      - ./data:/data
+      - ./server.zip:/modpacks/server.zip
+      - ../../common:/common:ro
+    environment:
+      EULA: "true"
+      TYPE: FORGE
+      GENERIC_PACK: /modpacks/server.zip
+      VERSION: 1.16.5
+      FORGEVERSION: 36.2.20
+      MOTD: "§l§cCreate: Above and Beyond§r (§5Creative§r)"
+      WHITELIST_FILE: /common/whitelist.json
+      OPS_FILE: /common/ops.json
+      OVERRIDE_SERVER_PROPERTIES: true
+      MAX_TICK_TIME: -1
+      PVP: false
+      MEMORY: 24G
+      ENABLE_AUTOPAUSE: TRUE
+      USE_MODPACK_START_SCRIPT: false
+    restart: unless-stopped
+    ports:
+      - "25565:25565"
+
+  create-creative-backup:
+    image: itzg/mc-backup
+    container_name: create-creative-backup
+    environment:
+      BACKUP_INTERVAL: "1h"
+      MODPACK: "Create: Above and Beyond (1.16.5) - Creative Mode"
+      BACKUP_NAME: "create-creative"
+      PAUSE_IF_NO_PLAYERS: true
+      POST_BACKUP_SCRIPT: |
+        echo "Completed backup for $$MODPACK!"
+        echo "Cleaning up superfluous backups..."
+        ls -t /backups | tail -n +4 | xargs rm --
+        echo "Cleaned! Only three newest backups remain."
+    volumes:
+    - ./data:/data:ro
+    - /home/backups/create-above-and-beyond:/backups  # Set a path connected to cloud storage here for easy off-site backup!
+    restart: unless-stopped
+    network_mode: "service:create-creative"
